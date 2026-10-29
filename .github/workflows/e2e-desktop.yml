@@ -93,24 +93,20 @@ jobs:
       # On main, we run with --update-snapshots to generate baselines.
       # `npm run test:e2e` builds dist/ as a pretest hook so the renderer
       # is always fresh — no separate build step needed.
-      # Run one Playwright worker because the stateful desktop fixtures share
-      # the mock-backend process; cross-file parallelism can restart that
-      # process underneath another test and hide its background-state events.
       - name: Run Playwright E2E tests
         working-directory: apps/desktop
         run: |
           if [ "${{ github.ref_name }}" = "main" ]; then
             echo "On main — generating/updating baseline screenshots"
             npm run build && xvfb-run -a --server-args="-screen 0 1280x1024x24" \
-              npx playwright test --reporter=list --workers=1 --update-snapshots
+              npx playwright test --reporter=list --update-snapshots
           else
             echo "On PR — comparing against cached baselines"
             npm run build && xvfb-run -a --server-args="-screen 0 1280x1024x24" \
-              npx playwright test --reporter=list --workers=1
+              npx playwright test --reporter=list
           fi
         env:
           CI: "true"
-          HERMES_YOLO_MODE: "1"
           # Ensure no real API keys leak into the test env.
           OPENROUTER_API_KEY: ""
           OPENAI_API_KEY: ""
